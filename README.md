@@ -10,14 +10,14 @@
 </p>
 
 <h1 align="center">RayCon-SfM</h1>
-<p align="center"><strong>Organize. Validate. Export.</strong><br />特征关联与可见性检查工具</p>
+<p align="center"><strong>Structure from Motion</strong><br />运动恢复结构（SfM）</p>
 <p align="center"><a href="#quick-start">Quick start</a> · <a href="#preview">Preview</a> · <a href="#roadmap">Roadmap</a> · <a href="docs/INPUTS.md">Input formats</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-输入成对特征关联，获得清晰的轨迹分组与可见性记录。 `v0.1.0` 提供两套可以独立运行的 C++17 / Python 工具、可再生合成样例、图像预览和本地检查脚本。
+RayCon-SfM 是一个运动恢复结构（SfM）项目，按版本逐步开放代码。首个公开版本先开放配套工具；下一版本计划提供 SfM 系统试运行代码、示例配置与启动脚本。 `v0.1.0` 提供两套可以独立运行的 C++17 / Python 工具、可再生合成样例、图像预览和本地检查脚本。
 
-> **Public preview**：这是一个独立实现的通用工具预览包。当前提供匹配关联的整理与导出，不包含特征提取、相机位姿估计、三角化或重建优化后端。 封面是概念插画；下面的预览图来自本仓库合成数据的实际输出。
+> **Public preview**：当前 `v0.1.0` 开放配套工具与合成样例，SfM 系统试运行入口计划在下一版本提供。 封面是概念插画；下面的预览图来自本仓库合成数据的实际输出。
 
-## What's inside
+## Available in v0.1
 
 | Module | Available in v0.1.0 |
 | --- | --- |
@@ -78,11 +78,11 @@ python3 scripts/render_preview.py --input result/my-preview/tracks.json
 | Target | Planned public content | Status |
 | --- | --- | --- |
 | September 2026 · v0.1.0 | C++ / Python 工具、合成数据、导出样例、预览图 | Available |
-| October 2026 | 更多关联图样例、冲突诊断记录与批量输入示例 | Planned |
-| November 2026 | 轨迹检查报告与可见性浏览的公开样例 | Planned |
-| **December 2026 · v0.2 preview** | **计划公开批量轨迹整理入口、数据格式适配器和交互检查示例** | **Tentative** |
+| October 2026 | 完善数据接口、示例配置和配套工具文档 | Planned |
+| November 2026 | 准备 SfM 系统试运行入口与测试样例 | Planned |
+| **December 2026 · v0.2 preview** | **计划发布 SfM 试运行代码、示例配置和启动脚本** | **Tentative** |
 
-十二月是暂定目标，后续功能尚未实现或承诺交付；实际开放内容以 GitHub Release 为准。路线图仅涉及公开工具与演示，不包含研究算法的开放安排。
+下一版本以 SfM 系统试运行为目标，暂定于 2026 年 12 月开放；具体功能、支持数据和运行要求以对应 GitHub Release 为准。
 
 ## Build & checks
 

@@ -1,4 +1,4 @@
-# RayCon-SfM — Public Track Utilities
+# RayCon-SfM · v0.1 配套工具输入与输出
 
 功能受限的外围演示：将成对特征匹配整理成多图特征轨迹，剔除冲突并导出可见性表。没有相机位姿估计、三维点求解或 RayCon 优化后端，不是完整的图像重建流程。
 
