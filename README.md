@@ -1,2 +1,46 @@
-# RayCon-SfM
-Public demo utilities for feature-track organization and visibility export. Core research implementation is not included.
+# RayCon-SfM — Public Track Utilities
+
+功能受限的外围演示：将成对特征匹配整理成多图特征轨迹，剔除冲突并导出可见性表。没有相机位姿估计、三维点求解或 RayCon 优化后端，不是完整的图像重建流程。
+
+## 运行
+
+需要 Python 3.10 或更新版本，无第三方依赖。在本目录执行：
+
+```bash
+bash run.sh
+python3 -B -m unittest discover -s tests -v
+```
+
+自定义输入：
+
+```bash
+python3 -B src/tracks.py --input data/pair_matches.csv --min-views 3 --output result/custom-run
+```
+
+`--output` 指定尚不存在的目录；省略时自动创建 `result/` 下的新时间目录。最低视图数默认是 2，上面的自定义示例设为 3。
+
+## 数据与规则
+
+`data/pair_matches.csv` 是手写合成关联，列为 `image_a,feature_a,image_b,feature_b`。图像编号和特征编号为非负整数，不要求连续；同一图像中的特征编号必须在所有匹配行中指代同一特征。没有像素坐标、相机参数或三维坐标，程序不读取实际图像。
+
+以“图像编号、特征编号”作为节点，以匹配作为无向边，计算图连通分量。重复边只计算一次。同一连通分量如果包含同一图像的多个不同特征，整条分量剔除并记录，不尝试修复。剩余分量按最低视图数筛选。
+
+连通性只代表匹配关联，不证明几何正确。程序没有几何验证、外点估计或三角化功能。节点和分量排序后导出，输入行顺序变化不影响轨迹编号。
+
+## 实际流程与文件
+
+1. 校验编号及跨图匹配关系。
+2. 去重、建立无向图并查找连通分量。
+3. 剔除冲突与短轨迹，导出关联及统计。
+
+| 文件 | 含义 |
+| --- | --- |
+| `src/tracks.py` | 通用图关联、轨迹整理和命令行入口 |
+| `run.sh` | 合成数据快捷入口，可转发参数 |
+| `tests/test_tracks.py` | 传递关联、冲突、去重及稳定输出检查 |
+| `result/<运行目录>/tracks.json` | 每条有效轨迹的图像和特征编号 |
+| `result/<运行目录>/visibility.csv` | `track_id,image_id,feature_id` 可见性长表 |
+| `result/<运行目录>/rejected.json` | 剔除原因和对应完整分量 |
+| `result/<运行目录>/summary.json` | 匹配数、重复数、轨迹数与长度分布 |
+
+默认样例共 10 行匹配，其中一行为重复边；保留 3 条轨迹，长度分别为 3、4、2 个视图，剔除一个含同图冲突的分量。全部分量被剔除时正常导出空轨迹及零保留统计。上述数量是输入整理结果，不是相机注册数量、重建成功率或论文精度。
