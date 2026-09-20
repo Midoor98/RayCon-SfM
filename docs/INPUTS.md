@@ -1,48 +1,48 @@
-# RayCon-SfM · v0.1 配套工具输入与输出
+# RayCon-SfM · v0.1 companion tools: inputs and outputs
 
-功能受限的外围演示：将成对特征匹配整理成多图特征轨迹，剔除冲突并导出可见性表。没有相机位姿估计、三维点求解或 RayCon 优化后端，不是完整的图像重建流程。
+The companion tools included in v0.1 organize pairwise feature matches into tracks across images, reject conflicts and export a visibility table. This release does not include camera pose estimation, 3D point estimation or the RayCon optimization backend. The full image reconstruction pipeline is outside the scope of these tools; system trial-run code is planned for the next version.
 
-## 运行
+## Run
 
-需要 Python 3.10 或更新版本，无第三方依赖。在仓库根目录执行：
+Requires Python 3.10 or later, with no third-party dependencies. Run from the repository root:
 
 ```bash
 bash run.sh
 python3 -B -m unittest discover -s tests -v
 ```
 
-自定义输入：
+To specify an input file:
 
 ```bash
 python3 -B src/tracks.py --input data/pair_matches.csv --min-views 3 --output result/custom-run
 ```
 
-`--output` 指定尚不存在的目录；省略时自动创建 `result/` 下的新时间目录。最低视图数默认是 2，上面的自定义示例设为 3。
+The directory specified by `--output` must not already exist. If omitted, a new timestamped directory is created under `result/`. The minimum view count defaults to 2; the custom example above sets it to 3.
 
-## 数据与规则
+## Data and rules
 
-`data/pair_matches.csv` 是手写合成关联，列为 `image_a,feature_a,image_b,feature_b`。图像编号和特征编号为非负整数，不要求连续；同一图像中的特征编号必须在所有匹配行中指代同一特征。没有像素坐标、相机参数或三维坐标，程序不读取实际图像。
+`data/pair_matches.csv` contains hand-authored synthetic correspondences with columns `image_a,feature_a,image_b,feature_b`. Image IDs and feature IDs are nonnegative integers and need not be consecutive. Within an image, a feature ID must refer to the same feature across all match rows. The input contains no pixel coordinates, camera parameters or 3D coordinates, and the program does not read actual images.
 
-以“图像编号、特征编号”作为节点，以匹配作为无向边，计算图连通分量。重复边只计算一次。同一连通分量如果包含同一图像的多个不同特征，整条分量剔除并记录，不尝试修复。剩余分量按最低视图数筛选。
+Each image-ID/feature-ID pair is a node, and each match is an undirected edge. The tools compute connected components of this graph, counting duplicate edges only once. If a component contains multiple distinct features from the same image, the entire component is rejected and recorded without attempting a repair. The remaining components are filtered by the minimum view count.
 
-连通性只代表匹配关联，不证明几何正确。程序没有几何验证、外点估计或三角化功能。节点和分量排序后导出，输入行顺序变化不影响轨迹编号。
+Connectivity represents match associations and does not establish geometric correctness. The tools do not perform geometric verification, outlier estimation or triangulation. Nodes and components are sorted before export, so reordering the input rows does not change track IDs.
 
-## 实际流程与文件
+## Workflow and files
 
-1. 校验编号及跨图匹配关系。
-2. 去重、建立无向图并查找连通分量。
-3. 剔除冲突与短轨迹，导出关联及统计。
+1. Validate IDs and cross-image match relationships.
+2. Remove duplicate edges, construct the undirected graph and find connected components.
+3. Reject conflicting or short tracks, then export associations and statistics.
 
-| 文件 | 含义 |
+| File | Purpose |
 | --- | --- |
-| `src/tracks.py` | 通用图关联、轨迹整理和命令行入口 |
-| `run.sh` | 合成数据快捷入口，可转发参数 |
-| `tests/test_tracks.py` | 传递关联、冲突、去重及稳定输出检查 |
-| `result/<运行目录>/tracks.json` | 每条有效轨迹的图像和特征编号 |
-| `result/<运行目录>/visibility.csv` | `track_id,image_id,feature_id` 可见性长表 |
-| `result/<运行目录>/rejected.json` | 剔除原因和对应完整分量 |
-| `result/<运行目录>/summary.json` | 匹配数、重复数、轨迹数与长度分布 |
+| `src/tracks.py` | Generic graph association, track organization and command-line entry point |
+| `run.sh` | Shortcut for the synthetic example; forwards command-line arguments |
+| `tests/test_tracks.py` | Checks for transitive associations, conflicts, deduplication and stable output |
+| `result/<run-directory>/tracks.json` | Image and feature IDs for each accepted track |
+| `result/<run-directory>/visibility.csv` | Visibility records in `track_id,image_id,feature_id` format |
+| `result/<run-directory>/rejected.json` | Rejection reasons and the complete corresponding components |
+| `result/<run-directory>/summary.json` | Match counts, duplicate counts, track counts and track-length distribution |
 
-默认样例共 10 行匹配，其中一行为重复边；保留 3 条轨迹，长度分别为 3、4、2 个视图，剔除一个含同图冲突的分量。全部分量被剔除时正常导出空轨迹及零保留统计。上述数量是输入整理结果，不是相机注册数量、重建成功率或论文精度。
+The default example contains 10 match rows, including one duplicate edge. It retains 3 tracks spanning 3, 4 and 2 views, and rejects one component with a same-image conflict. If all components are rejected, the tools still export empty tracks and statistics showing zero accepted tracks. These counts describe correspondence processing; they are not camera registration counts, reconstruction success rates or research accuracy results.
 
-C++ 入口使用同一数据格式，要求表头顺序与示例一致，字段不加引号；整数编号只使用十进制数字。C++ 默认演示可用 `bash run_cpp.sh` 执行。
+The C++ entry point uses the same data format and requires the header order shown in the example, with unquoted fields. Integer IDs must consist of decimal digits only. Run the default C++ example with `bash run_cpp.sh`.

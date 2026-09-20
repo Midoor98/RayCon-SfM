@@ -10,27 +10,27 @@
 </p>
 
 <h1 align="center">RayCon-SfM</h1>
-<p align="center"><strong>Structure from Motion</strong><br />运动恢复结构（SfM）</p>
+<p align="center"><strong>Structure from Motion</strong><br />Staged public releases for the SfM project</p>
 <p align="center"><a href="#quick-start">Quick start</a> · <a href="#preview">Preview</a> · <a href="#roadmap">Roadmap</a> · <a href="docs/INPUTS.md">Input formats</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-RayCon-SfM 是一个运动恢复结构（SfM）项目，按版本逐步开放代码。首个公开版本先开放配套工具；下一版本计划提供 SfM 系统试运行代码、示例配置与启动脚本。 `v0.1.0` 提供两套可以独立运行的 C++17 / Python 工具、可再生合成样例、图像预览和本地检查脚本。
+RayCon-SfM is a Structure-from-Motion (SfM) project with staged public code releases. The first public version opens the companion tools; the next version is planned to provide SfM system trial-run code, example configurations and launch scripts. `v0.1.0` includes standalone C++17 and Python implementations, reproducible synthetic examples, preview images and local check scripts.
 
-> **Public preview**：当前 `v0.1.0` 开放配套工具与合成样例，SfM 系统试运行入口计划在下一版本提供。 封面是概念插画；下面的预览图来自本仓库合成数据的实际输出。
+> **Public preview:** `v0.1.0` makes the companion tools and synthetic examples available. The SfM system trial-run entry point is planned for the next version. The cover is concept artwork; the preview below shows actual output from the synthetic data included in this repository.
 
 ## Available in v0.1
 
 | Module | Available in v0.1.0 |
 | --- | --- |
-| Organize | 通过图连通分量整理成对特征关联，确定性排序与编号 |
-| Validate | 去除重复边，剔除同图冲突与视图不足的分量 |
-| Export | 输出特征轨迹 JSON、可见性 CSV 和拒绝记录 |
-| C++ + Python | 标准库实现，无私有依赖；附两种实现的输出交叉检查 |
+| Organize | Organize pairwise feature correspondences into graph components with deterministic ordering and IDs |
+| Validate | Remove duplicate edges and reject components with same-image conflicts or too few views |
+| Export | Export feature tracks as JSON, visibility as CSV and rejection records |
+| C++ + Python | Standard-library implementations with no private dependencies; includes output cross-checks between both implementations |
 
 ## Quick start
 
 ### C++ preview
 
-需要 C++17 编译器、CMake 3.16 及以上版本。默认构建包含检查工具，因此也需要 Python 3.10 及以上版本。
+Requires a C++17 compiler and CMake 3.16 or later. The default build includes checks, which also require Python 3.10 or later.
 
 ```bash
 git clone https://github.com/Midoor98/RayCon-SfM.git
@@ -38,7 +38,7 @@ cd RayCon-SfM
 bash run_cpp.sh
 ```
 
-输出位于新的 `result/cpp-*` 目录。查看版本与参数：
+Outputs are written to a new `result/cpp-*` directory. To view the version and command-line options:
 
 ```bash
 ./build/raycon_sfm_preview --version
@@ -47,22 +47,22 @@ bash run_cpp.sh
 
 ### Python preview
 
-只使用 Python 标准库，无需安装额外包：
+Uses only the Python standard library; no additional packages are required:
 
 ```bash
 bash run.sh
 bash run.sh --version
 ```
 
-两个入口均可传入 `--input` 和 `--output`，指定的输出目录必须尚不存在。完整字段与坐标约定见 [Input formats](docs/INPUTS.md)。不需要 Python 的纯 C++ 构建可使用 `-DBUILD_TESTING=OFF`。
+Both entry points accept `--input` and `--output`. The specified output directory must not already exist. See [Input formats](docs/INPUTS.md) for field definitions and data conventions. For a C++-only build without Python, configure CMake with `-DBUILD_TESTING=OFF`.
 
 ## Preview
 
 ![RayCon-SfM synthetic data preview](docs/assets/demo-preview.png)
 
-16 条轨迹来自程序生成的特征关联，8 个图像编号不代表真实图像重建或相机注册结果。 这张图不表示定位或重建精度。
+The 16 tracks come from generated feature correspondences. The 8 image IDs do not represent reconstructed images or registered cameras. This preview does not measure localization or reconstruction accuracy.
 
-生成样例、运行 C++ 并重绘预览：
+Generate the example data, run the C++ tool and render the preview:
 
 ```bash
 python3 scripts/make_example.py
@@ -71,18 +71,18 @@ python3 -m pip install -r requirements-preview.txt
 python3 scripts/render_preview.py --input result/my-preview/tracks.json
 ```
 
-`matplotlib` 仅用于重绘预览；普通运行与测试不依赖它。再次运行时为 `--output` 换一个新目录。封面来源与生成提示见 [Artwork](docs/ARTWORK.md)。
+`matplotlib` is required only to render previews; normal execution and tests do not depend on it. Choose a new `--output` directory for each run. See [Artwork](docs/ARTWORK.md) for the cover provenance and generation prompt.
 
 ## Roadmap
 
 | Target | Planned public content | Status |
 | --- | --- | --- |
-| September 2026 · v0.1.0 | C++ / Python 工具、合成数据、导出样例、预览图 | Available |
-| October 2026 | 完善数据接口、示例配置和配套工具文档 | Planned |
-| November 2026 | 准备 SfM 系统试运行入口与测试样例 | Planned |
-| **December 2026 · v0.2 preview** | **计划发布 SfM 试运行代码、示例配置和启动脚本** | **Tentative** |
+| September 2026 · v0.1.0 | C++ / Python tools, synthetic data, export examples and preview images | Available |
+| October 2026 | Refine data interfaces, example configurations and companion-tool documentation | Planned |
+| November 2026 | Prepare the SfM system trial-run entry point and test examples | Planned |
+| **December 2026 · v0.2 preview** | **Planned release of SfM trial-run code, example configurations and launch scripts** | **Tentative** |
 
-下一版本以 SfM 系统试运行为目标，暂定于 2026 年 12 月开放；具体功能、支持数据和运行要求以对应 GitHub Release 为准。
+The next version targets SfM system trial runs, with a tentative public release in December 2026. Final functionality, supported data and setup requirements will be specified in the corresponding GitHub Release.
 
 ## Build & checks
 
@@ -90,7 +90,7 @@ python3 scripts/render_preview.py --input result/my-preview/tracks.json
 bash scripts/check.sh
 ```
 
-检查涵盖 Python 单元测试、C++ Release 构建、两种实现的输出一致性、非法输入、已有结果保护以及版本标识。当前在 Ubuntu / GCC 环境核验；仓库不包含平台专属编译产物。
+Checks cover Python unit tests, a C++ Release build, output consistency between the two implementations, invalid inputs, protection of existing results and version reporting. The tools have been checked on Ubuntu with GCC. Platform-specific build artifacts are not included in the repository.
 
 ```text
 cpp/                 C++17 source and small CSV utilities
@@ -105,4 +105,4 @@ VERSION              Public preview version
 
 ## Feedback
 
-使用 [Issues](https://github.com/Midoor98/RayCon-SfM/issues) 报告复现步骤、输入格式问题或公开工具的改进建议。请用合成或可公开的数据描述问题。
+Use [Issues](https://github.com/Midoor98/RayCon-SfM/issues) to report problems with reproduction steps, ask about input formats or suggest improvements to the public tools. Please use synthetic or publicly shareable data when describing an issue.
