@@ -73,6 +73,8 @@ def build_tracks(rows, min_views=2):
 def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
+    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+    parser.add_argument("--version", action="version", version=f"RayCon-SfM public preview {version}")
     parser.add_argument("--input", type=Path, default=root / "data/pair_matches.csv")
     parser.add_argument("--min-views", type=int, default=2)
     parser.add_argument("--output", type=Path)
@@ -81,6 +83,7 @@ def main():
         with args.input.open(newline="", encoding="utf-8") as stream:
             rows = list(csv.DictReader(stream))
         tracks, rejected, summary = build_tracks(rows, args.min_views)
+        summary["version"] = version
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
         output = args.output or root / "result" / stamp
         output.mkdir(parents=True, exist_ok=False)

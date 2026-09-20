@@ -1,46 +1,108 @@
-# RayCon-SfM — Public Track Utilities
+<p align="center">
+  <img src="docs/assets/hero-v0.1.png" alt="RayCon-SfM v0.1.0 public preview — concept artwork" width="100%" />
+</p>
 
-功能受限的外围演示：将成对特征匹配整理成多图特征轨迹，剔除冲突并导出可见性表。没有相机位姿估计、三维点求解或 RayCon 优化后端，不是完整的图像重建流程。
+<p align="center">
+  <a href="https://github.com/Midoor98/RayCon-SfM/releases/tag/v0.1.0"><img alt="Version v0.1.0" src="https://img.shields.io/badge/preview-v0.1.0-8b7cff?style=flat-square" /></a>
+  <img alt="C++17" src="https://img.shields.io/badge/C%2B%2B-17-4cc9f0?style=flat-square" />
+  <img alt="Python 3.10 or later" src="https://img.shields.io/badge/Python-3.10%2B-80e8cf?style=flat-square" />
+  <img alt="Synthetic examples included" src="https://img.shields.io/badge/data-synthetic-25334d?style=flat-square" />
+</p>
 
-## 运行
+<h1 align="center">RayCon-SfM</h1>
+<p align="center"><strong>Organize. Validate. Export.</strong><br />特征关联与可见性检查工具</p>
+<p align="center"><a href="#quick-start">Quick start</a> · <a href="#preview">Preview</a> · <a href="#roadmap">Roadmap</a> · <a href="docs/INPUTS.md">Input formats</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-需要 Python 3.10 或更新版本，无第三方依赖。在本目录执行：
+输入成对特征关联，获得清晰的轨迹分组与可见性记录。 `v0.1.0` 提供两套可以独立运行的 C++17 / Python 工具、可再生合成样例、图像预览和本地检查脚本。
+
+> **Public preview**：这是一个独立实现的通用工具预览包。当前提供匹配关联的整理与导出，不包含特征提取、相机位姿估计、三角化或重建优化后端。 封面是概念插画；下面的预览图来自本仓库合成数据的实际输出。
+
+## What's inside
+
+| Module | Available in v0.1.0 |
+| --- | --- |
+| Organize | 通过图连通分量整理成对特征关联，确定性排序与编号 |
+| Validate | 去除重复边，剔除同图冲突与视图不足的分量 |
+| Export | 输出特征轨迹 JSON、可见性 CSV 和拒绝记录 |
+| C++ + Python | 标准库实现，无私有依赖；附两种实现的输出交叉检查 |
+
+## Quick start
+
+### C++ preview
+
+需要 C++17 编译器、CMake 3.16 及以上版本。默认构建包含检查工具，因此也需要 Python 3.10 及以上版本。
+
+```bash
+git clone https://github.com/Midoor98/RayCon-SfM.git
+cd RayCon-SfM
+bash run_cpp.sh
+```
+
+输出位于新的 `result/cpp-*` 目录。查看版本与参数：
+
+```bash
+./build/raycon_sfm_preview --version
+./build/raycon_sfm_preview --help
+```
+
+### Python preview
+
+只使用 Python 标准库，无需安装额外包：
 
 ```bash
 bash run.sh
-python3 -B -m unittest discover -s tests -v
+bash run.sh --version
 ```
 
-自定义输入：
+两个入口均可传入 `--input` 和 `--output`，指定的输出目录必须尚不存在。完整字段与坐标约定见 [Input formats](docs/INPUTS.md)。不需要 Python 的纯 C++ 构建可使用 `-DBUILD_TESTING=OFF`。
+
+## Preview
+
+![RayCon-SfM synthetic data preview](docs/assets/demo-preview.png)
+
+16 条轨迹来自程序生成的特征关联，8 个图像编号不代表真实图像重建或相机注册结果。 这张图不表示定位或重建精度。
+
+生成样例、运行 C++ 并重绘预览：
 
 ```bash
-python3 -B src/tracks.py --input data/pair_matches.csv --min-views 3 --output result/custom-run
+python3 scripts/make_example.py
+bash run_cpp.sh --input data/showcase_matches.csv --output result/my-preview
+python3 -m pip install -r requirements-preview.txt
+python3 scripts/render_preview.py --input result/my-preview/tracks.json
 ```
 
-`--output` 指定尚不存在的目录；省略时自动创建 `result/` 下的新时间目录。最低视图数默认是 2，上面的自定义示例设为 3。
+`matplotlib` 仅用于重绘预览；普通运行与测试不依赖它。再次运行时为 `--output` 换一个新目录。封面来源与生成提示见 [Artwork](docs/ARTWORK.md)。
 
-## 数据与规则
+## Roadmap
 
-`data/pair_matches.csv` 是手写合成关联，列为 `image_a,feature_a,image_b,feature_b`。图像编号和特征编号为非负整数，不要求连续；同一图像中的特征编号必须在所有匹配行中指代同一特征。没有像素坐标、相机参数或三维坐标，程序不读取实际图像。
+| Target | Planned public content | Status |
+| --- | --- | --- |
+| September 2026 · v0.1.0 | C++ / Python 工具、合成数据、导出样例、预览图 | Available |
+| October 2026 | 更多关联图样例、冲突诊断记录与批量输入示例 | Planned |
+| November 2026 | 轨迹检查报告与可见性浏览的公开样例 | Planned |
+| **December 2026 · v0.2 preview** | **计划公开批量轨迹整理入口、数据格式适配器和交互检查示例** | **Tentative** |
 
-以“图像编号、特征编号”作为节点，以匹配作为无向边，计算图连通分量。重复边只计算一次。同一连通分量如果包含同一图像的多个不同特征，整条分量剔除并记录，不尝试修复。剩余分量按最低视图数筛选。
+十二月是暂定目标，后续功能尚未实现或承诺交付；实际开放内容以 GitHub Release 为准。路线图仅涉及公开工具与演示，不包含研究算法的开放安排。
 
-连通性只代表匹配关联，不证明几何正确。程序没有几何验证、外点估计或三角化功能。节点和分量排序后导出，输入行顺序变化不影响轨迹编号。
+## Build & checks
 
-## 实际流程与文件
+```bash
+bash scripts/check.sh
+```
 
-1. 校验编号及跨图匹配关系。
-2. 去重、建立无向图并查找连通分量。
-3. 剔除冲突与短轨迹，导出关联及统计。
+检查涵盖 Python 单元测试、C++ Release 构建、两种实现的输出一致性、非法输入、已有结果保护以及版本标识。当前在 Ubuntu / GCC 环境核验；仓库不包含平台专属编译产物。
 
-| 文件 | 含义 |
-| --- | --- |
-| `src/tracks.py` | 通用图关联、轨迹整理和命令行入口 |
-| `run.sh` | 合成数据快捷入口，可转发参数 |
-| `tests/test_tracks.py` | 传递关联、冲突、去重及稳定输出检查 |
-| `result/<运行目录>/tracks.json` | 每条有效轨迹的图像和特征编号 |
-| `result/<运行目录>/visibility.csv` | `track_id,image_id,feature_id` 可见性长表 |
-| `result/<运行目录>/rejected.json` | 剔除原因和对应完整分量 |
-| `result/<运行目录>/summary.json` | 匹配数、重复数、轨迹数与长度分布 |
+```text
+cpp/                 C++17 source and small CSV utilities
+src/                 Python implementation
+data/                Synthetic fixtures only
+scripts/             Checks, fixture generation and preview rendering
+tests/               Unit tests and C++/Python cross-checks
+docs/                Input reference and visual assets
+CMakeLists.txt       Standalone C++ build
+VERSION              Public preview version
+```
 
-默认样例共 10 行匹配，其中一行为重复边；保留 3 条轨迹，长度分别为 3、4、2 个视图，剔除一个含同图冲突的分量。全部分量被剔除时正常导出空轨迹及零保留统计。上述数量是输入整理结果，不是相机注册数量、重建成功率或论文精度。
+## Feedback
+
+使用 [Issues](https://github.com/Midoor98/RayCon-SfM/issues) 报告复现步骤、输入格式问题或公开工具的改进建议。请用合成或可公开的数据描述问题。
